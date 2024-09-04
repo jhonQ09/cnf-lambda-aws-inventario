@@ -1,7 +1,7 @@
 # Aplicación de Gestión de Inventarios ![Status badge](https://img.shields.io/badge/status-in%20progress-yellow)
 
 
-![Alt text](\arquitectura.png)
+![Alt text](https://github.com/jhonQ09/cnf-lambdas-aws-inventory/blob/trunk/arquitectura.png?raw=true)
 
 > ## CONTENIDO
 * [Descripción](https://github.com/jhonQ09/cnf-lambdas-aws-inventory.git)
