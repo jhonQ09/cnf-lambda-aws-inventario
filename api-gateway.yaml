@@ -1,0 +1,118 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Creación de Lambda y API Gateway para gestionar productos'
+
+Parameters:
+  Stage:
+    Description: 'Código de letras definidos para los nombres de los ambientes'
+    Type: String
+  AccountNumber:
+    Description: 'Número de cuenta AWS'
+    Type: String
+  AwsRegion:
+    Description: 'Región AWS'
+    Type: String
+  ApiName:
+    Description: 'Nombre de API Gateway'
+    Type: String
+  LambdaFunctionOutputARN1:
+    Description: 'ARN de Lambda para listar productos'
+    Type: String
+  LambdaFunctionOutputARN2:
+    Description: 'ARN de Lambda para ingresar productos'
+    Type: String
+  LambdaFunctionOutputARN3:
+    Description: 'ARN de Lambda para salida de productos'
+    Type: String
+
+Resources:
+  Api:
+    Type: 'AWS::ApiGateway::RestApi'
+    Properties:
+      Name: !Ref ApiName
+      Description: 'API Gateway para gestionar productos'
+
+  ProductosResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      ParentId: !GetAtt Api.RootResourceId
+      PathPart: 'productos'
+      RestApiId: !Ref Api
+
+  SalidaResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      ParentId: !GetAtt ProductosResource.Id
+      PathPart: 'salida'
+      RestApiId: !Ref Api
+
+  ListarProductosMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      AuthorizationType: 'NONE'
+      HttpMethod: 'GET'
+      ResourceId: !Ref ProductosResource
+      RestApiId: !Ref Api
+      Integration:
+        IntegrationHttpMethod: 'POST'
+        Type: 'AWS_PROXY'
+        Uri: !Sub 'arn:aws:apigateway:${AwsRegion}:lambda:path/2015-03-31/functions/${LambdaFunctionOutputARN1}/invocations'
+      MethodResponses:
+        - StatusCode: '200'
+
+  IngresarProductoMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      AuthorizationType: 'NONE'
+      HttpMethod: 'POST'
+      ResourceId: !Ref ProductosResource
+      RestApiId: !Ref Api
+      Integration:
+        IntegrationHttpMethod: 'POST'
+        Type: 'AWS_PROXY'
+        Uri: !Sub 'arn:aws:apigateway:${AwsRegion}:lambda:path/2015-03-31/functions/${LambdaFunctionOutputARN2}/invocations'
+      MethodResponses:
+        - StatusCode: '200'
+
+  SalidaProductoMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      AuthorizationType: 'NONE'
+      HttpMethod: 'POST'
+      ResourceId: !Ref SalidaResource
+      RestApiId: !Ref Api
+      Integration:
+        IntegrationHttpMethod: 'POST'
+        Type: 'AWS_PROXY'
+        Uri: !Sub 'arn:aws:apigateway:${AwsRegion}:lambda:path/2015-03-31/functions/${LambdaFunctionOutputARN3}/invocations'
+      MethodResponses:
+        - StatusCode: '200'
+
+  # Permisos para API Gateway a las funciones Lambda
+  LambdaInvokePermissionListarProductos:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Sub '${LambdaFunctionOutputARN1}'
+      Principal: 'apigateway.amazonaws.com'
+      SourceArn: !Sub 'arn:aws:execute-api:${AwsRegion}:${AccountNumber}:${Api}/*/GET/productos'
+
+  LambdaInvokePermissionIngresarProducto:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Sub '${LambdaFunctionOutputARN2}'
+      Principal: 'apigateway.amazonaws.com'
+      SourceArn: !Sub 'arn:aws:execute-api:${AwsRegion}:${AccountNumber}:${Api}/*/POST/productos'
+
+  LambdaInvokePermissionSalidaProducto:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Sub '${LambdaFunctionOutputARN3}'
+      Principal: 'apigateway.amazonaws.com'
+      SourceArn: !Sub 'arn:aws:execute-api:${AwsRegion}:${AccountNumber}:${Api}/*/POST/salida'
+
+Outputs:
+  ApiUrl:
+    Description: 'URL de la API Gateway'
+    Value: !Sub 'https://${Api}.execute-api.${AwsRegion}.amazonaws.com/${Stage}/productos'

@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creacion Role Lambda Rotation
+Parameters:
+  LambdaRoleName:
+    Description: Nombre del rol
+    Type: String
+  LambdaRotationName:
+    Description: Nombre del lambda
+    Type: String
+  LogGroupName:
+    Description: Log group name
+    Type: String
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref LambdaRoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: 'LambdaLoggingPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: '*'  
+Outputs:
+  LambdaRoleOutputARN:
+    Description: ARN Role Lambda Rotation
+    Value: !GetAtt LambdaRole.Arn

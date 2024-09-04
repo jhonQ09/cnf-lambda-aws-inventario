@@ -1,0 +1,159 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Creacion lambdas
+
+Parameters:
+  StackName:
+    Description: Nombre de pila recursos
+    Type: String
+  AccountNumber:
+    Description: Numero de cuenta AWS
+    Type: String
+  AwsRegion:
+    Description: Region AWS
+    Type: String
+  BucketNameLambda:
+    Description: Nombre del Bucket que contendra el codigo de los repositorios Lambda
+    Type: String
+  FolderName:
+    Description: Nombre del folder donde se alojara  los archivos yaml de la infraestructura de la aplicacion
+    Type: String
+  LambdaName1:
+    Description: Nombre del lambda
+    Type: String
+  LambdaName2:
+    Description: Nombre del lambda
+    Type: String  
+  LambdaName3:
+    Description: Nombre del lambda
+    Type: String  
+  LambdaRoleARN:
+    Description: ARN del Role
+    Type: String
+  PrivateSubnetId:
+    Description: Subnet donde se desplegara 
+    Type: String
+
+Resources:
+  ListarProductosLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaName1
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${StackName}-SecurityGroup
+        SubnetIds: 
+          - !Ref PrivateSubnetId
+      Handler: index.lambda_function
+      Role: !Ref LambdaRoleARN
+      Code:
+        S3Bucket: !Ref BucketNameLambda
+        S3Key: !Sub ${FolderName}/src/lambda_function1.zip
+      Runtime: nodejs20
+      Timeout: 40
+      Policies:
+        - 'AWSLambdaBasicExecutionRole'
+      Events:
+        ApiEvent:
+          Type: 'Api'
+          Properties:
+            Path: '/product'
+            Method: 'GET'
+
+  ListarProductosLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: '/aws/lambda/ListarProductosLambda'
+      RetentionInDays: 15       
+
+  IngresarProductoLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaName2
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${StackName}-SecurityGroup
+        SubnetIds: 
+          - !Ref PrivateSubnetId
+      Handler: index.lambda_function
+      Role: !Ref LambdaRoleARN
+      Code:
+        S3Bucket: !Ref BucketNameLambda
+        S3Key: !Sub ${FolderName}/src/lambda_function2.zip
+      Runtime: nodejs20
+      Timeout: 40
+      Policies:
+        - 'AWSLambdaBasicExecutionRole'
+      Events:
+        ApiEvent:
+          Type: 'Api'
+          Properties:
+            Path: '/product'
+            Method: 'GET'
+
+  IngresarProductoLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: '/aws/lambda/IngresarProductoLambda'
+      RetentionInDays: 15       
+
+  SalidaProductoLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaName3
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${StackName}-SecurityGroup
+        SubnetIds: 
+          - !Ref PrivateSubnetId
+      Handler: index.lambda_function
+      Role: !Ref LambdaRoleARN
+      Code:
+        S3Bucket: !Ref BucketNameLambda
+        S3Key: !Sub ${FolderName}/src/lambda_function3.zip
+      Runtime: nodejs20
+      Timeout: 40
+      Policies:
+        - 'AWSLambdaBasicExecutionRole'
+      Events:
+        ApiEvent:
+          Type: 'Api'
+          Properties:
+            Path: '/product'
+            Method: 'GET'
+
+  SalidaProductoLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: '/aws/lambda/SalidaProductoLambda'
+      RetentionInDays: 15                      
+      
+Outputs:
+  LambdaFunctionOutputARN1:
+    Description: Lambda Function ARN
+    Value: !GetAtt LambdaFunction1.Arn
+  LambdaFunctionOutput1:
+    Description: Lambda Function
+    Value: !Ref LambdaFunction1
+  LambdaFunctionOutputARN2:
+    Description: Lambda Function ARN
+    Value: !GetAtt LambdaFunction2.Arn
+  LambdaFunctionOutput2:
+    Description: Lambda Function
+    Value: !Ref LambdaFunction2
+  LambdaFunctionOutputARN3:
+    Description: Lambda Function ARN
+    Value: !GetAtt LambdaFunction3.Arn
+  LambdaFunctionOutput3:
+    Description: Lambda Function
+    Value: !Ref LambdaFunction3    
+
+Metadata:
+  AWS::Composer::Groups:
+    Group:
+      Label: Group
+      Members:
+        - LambdasFunctions
