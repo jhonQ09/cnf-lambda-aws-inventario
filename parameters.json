@@ -1,0 +1,126 @@
+[
+  {
+    "ParameterKey": "Stage",
+    "ParameterValue": "$(Stage)"
+  },
+  {
+    "ParameterKey": "StackName",
+    "ParameterValue": "$(StackName)"
+  },
+  {
+    "ParameterKey": "AccountNumber",
+    "ParameterValue": "$(AccountNumber)"
+  },
+  {
+    "ParameterKey": "AwsRegion",
+    "ParameterValue": "$(AwsRegion)"
+  },
+  {
+    "ParameterKey": "AvailabilityZone",
+    "ParameterValue": "$(AvailabilityZone)"
+  },
+  {
+    "ParameterKey": "ApplicationName",
+    "ParameterValue": "$(ApplicationName)"
+  },
+  {
+    "ParameterKey": "AreaPath",
+    "ParameterValue": "$(AreaPath)"
+  },
+  {
+    "ParameterKey": "ApplicationCode",
+    "ParameterValue": "$(ApplicationCode)"
+  },
+  {
+    "ParameterKey": "BillingMode",
+    "ParameterValue": "$(BillingMode)"
+  },
+  {
+    "ParameterKey": "PmoId",
+    "ParameterValue": "$(PmoId)"
+  },
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "$(ProjectName)"
+  },
+  {
+    "ParameterKey": "Repository",
+    "ParameterValue": "$(Repository)"
+  },
+  {
+    "ParameterKey": "ApplicationCC",
+    "ParameterValue": "$(ApplicationCC)"
+  },
+  {
+    "ParameterKey": "ProjectCC",
+    "ParameterValue": "$(ProjectCC)"
+  },
+  {
+    "ParameterKey": "State",
+    "ParameterValue": "$(State)"
+  },
+  {
+    "ParameterKey": "Release",
+    "ParameterValue": "$(Release)"
+  },
+  {
+    "ParameterKey": "AccountIndicator",
+    "ParameterValue": "$(AccountIndicator)"
+  },
+  {
+    "ParameterKey": "PrivateSubnetId",
+    "ParameterValue": "$(PrivateSubnetId)"
+  },
+  {
+    "ParameterKey": "BucketNameInfra",
+    "ParameterValue": "$(BucketNameInfra)"
+  },
+  {
+    "ParameterKey": "BucketNameScripts",
+    "ParameterValue": "$(BucketNameScripts)"
+  },
+  {
+    "ParameterKey": "BucketNameReports",
+    "ParameterValue": "$(BucketNameReports)"
+  },
+  {
+    "ParameterKey": "FolderNameOrigen",
+    "ParameterValue": "$(FolderNameOrigen)"
+  },
+  {
+    "ParameterKey": "FolderNameReportes",
+    "ParameterValue": "$(FolderNameReportes)"
+  },
+  {
+    "ParameterKey": "FolderName",
+    "ParameterValue": "$(FolderName)"
+  },
+  {
+    "ParameterKey": "CronTime",
+    "ParameterValue": "$(CronTime)"
+  },
+  {
+    "ParameterKey": "ApiName",
+    "ParameterValue": "$(ApiName)"
+  },
+  {
+    "ParameterKey": "LambdaName1",
+    "ParameterValue": "$(LambdaName1)"
+  },
+  {
+    "ParameterKey": "LambdaName2",
+    "ParameterValue": "$(LambdaName2)"
+  },
+  {
+    "ParameterKey": "LambdaName3",
+    "ParameterValue": "$(LambdaName3)"
+  },
+  {
+    "ParameterKey": "LambdaRoleName",
+    "ParameterValue": "$(LambdaRoleName)"
+  },
+  {
+    "ParameterKey": "LogGroupName",
+    "ParameterValue": "$(LogGroupName)"
+  }
+]

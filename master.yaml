@@ -1,0 +1,271 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Master
+Parameters:
+  StackName:
+    Description: Nombre de pila recursos
+    Type: String
+  Stage:
+    Description: Stage codigo de letras definidos para los nombres de los ambientes
+    Type: String
+  AccountNumber:
+    Description: Numero de cuenta AWS
+    Type: String
+  AwsRegion:
+    Description: Region sobre la cual sera creado el recurso
+    Type: String
+  AvailabilityZone:
+    Description: Zona  en donde estara las instancias
+    Type: String
+  ApplicationName:
+    Description: Nombre de la aplicacion para la cual se esta desplegando la solucion
+    Type: String
+  ApplicationCode:
+    Description: Codigo de la aplicacion
+    Type: String
+  BillingMode:
+    Description: Biiling mode del proyecto
+    Type: String
+  PmoId:
+    Description: Codigo de PMO del Proyecto
+    Type: String
+  ProjectName:
+    Description: Nombre del proyecto
+    Type: String
+  Repository:
+    Description: Nombre del repositorio
+    Type: String
+  ApplicationCC:
+    Description: Centro de costo de la aplicacion
+    Type: String
+  ProjectCC:
+    Description: Centro de costo del proyecto
+    Type: String
+  State:
+    Description: Estado del Proyecto
+    Type: String
+  Release:
+    Description: Release asociado a la etapa del proyecto (Release 1, 2, 3)
+    Type: String
+  AreaPath:
+    Description: Equipo encargado del recurso
+    Type: String
+  AccountIndicator:
+    Description: Tres letras que indiquen la cuenta sobre la cual sera creado el recurso
+    Type: String
+  PrivateSubnetId:
+    Description: Subnet de la lambda
+    Type: String
+  BucketNameScripts:
+    Description: Nombre del Bucket que contendra las carpetas el source code y librerias de cada microservicio
+    Type: String
+  BucketNameInfra:
+    Description: Nombre del bucket encargado de alojar la infraestructura principal
+    Type: String
+  BucketNameReports:
+    Description: Nombre del bucket donde se alojara la data de salida
+    Type: String
+  FolderNameOrigen:
+    Description: Nombre  de la carpeta en el bucket para los insumos de origen
+    Type: String
+  FolderNameReportes:
+    Description: Nombre  de la carpeta en el bucket para los insumos de  los
+      reportes
+    Type: String
+  FolderName:
+    Description: Nombre del folder donde se alojara  los archivos yaml de la  infraestructura  de la aplicacion
+    Type: String
+  CronTime:
+    Description: Intervalo de Ejecucion
+    Type: String
+  ApiName:
+    Description: Nombre de Api gateway
+    Type: String  
+  LambdaName1:
+    Description: Nombre del lambda
+    Type: String
+  LambdaName2:
+    Description: Nombre del lambda
+    Type: String
+  LambdaNam3:
+    Description: Nombre del lambda
+    Type: String   
+  LambdaRoleName:
+    Description: Nombre del rol
+    Type: String
+  LogGroupName:
+    Description: Log group name
+    Type: String
+
+Resources:
+  s3Buckets:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Sub "https://${BucketNameInfra}.s3.amazonaws.com/${FolderName}/s3.yaml"
+      Parameters:
+        Stage: !Ref Stage
+        BucketNameScripts: !Ref BucketNameScripts
+        BucketNameInfra: !Ref BucketNameInfra
+        BucketNameReports: !Ref BucketNameReports
+        FolderNameOrigen: !Ref FolderNameOrigen
+        FolderNameReportes: !Ref FolderNameReportes
+      Tags:
+        - Key: Name
+          Value: !Sub s3-${AreaPath}-${Stage}
+        - Key: application-code
+          Value: !Ref ApplicationCode
+        - Key: billing-mode
+          Value: !Ref BillingMode
+        - Key: pmo-id
+          Value: !Ref PmoId
+        - Key: project-name
+          Value: !Ref ProjectName
+        - Key: repository
+          Value: !Ref Repository
+        - Key: application-cc
+          Value: !Ref ApplicationCC
+        - Key: project-cc
+          Value: !Ref ProjectCC
+        - Key: "tec:environment-type"
+          Value: !Sub "${Stage}"
+        - Key: "tec:state"
+          Value: !Ref State 
+  
+  s3BucketsPolicies:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: s3Buckets
+    Properties:
+      TemplateURL: !Sub "https://${BucketNameInfra}.s3.amazonaws.com/${FolderName}/s3Policies.yaml"
+      Parameters:
+        Stage: !Ref Stage
+        BucketNameScriptsArn: !GetAtt s3Buckets.Outputs.BucketNameScriptsArn
+        BucketNameInfraArn: !GetAtt s3Buckets.Outputs.BucketNameInfraArn
+        BucketNameReportsArn: !GetAtt s3Buckets.Outputs.BucketNameReportsArn
+        BucketNameScripts: !Ref BucketNameScripts
+        BucketNameInfra: !Ref BucketNameInfra
+        BucketNameReports: !Ref BucketNameReports
+        FolderNameOrigen: !Ref FolderNameOrigen
+        FolderNameReportes: !Ref FolderNameReportes
+      Tags:
+        - Key: Name
+          Value: !Sub s3-${AreaPath}-${Stage}
+        - Key: application-code
+          Value: !Ref ApplicationCode
+        - Key: billing-mode
+          Value: !Ref BillingMode
+        - Key: pmo-id
+          Value: !Ref PmoId
+        - Key: project-name
+          Value: !Ref ProjectName
+        - Key: repository
+          Value: !Ref Repository
+        - Key: application-cc
+          Value: !Ref ApplicationCC
+        - Key: project-cc
+          Value: !Ref ProjectCC
+        - Key: "tec:environment-type"
+          Value: !Sub "${Stage}"
+        - Key: "tec:state"
+          Value: !Ref State
+
+  IamRoleLambda:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${BucketNameInfra}.s3.amazonaws.com/${FolderName}/iam-role-lambda.yaml
+      Parameters:
+        LambdaRoleName: !Ref LambdaRoleName
+        LambdaName: !Ref LambdaName
+        LogGroupName: !Ref LogGroupName
+      Tags:
+        - Key: Name
+          Value: !Sub Role-Lambda-${AreaPath}-${Stage}
+        - Key: application-code
+          Value: !Ref ApplicationCode
+        - Key: billing-mode
+          Value: !Ref BillingMode
+        - Key: pmo-id
+          Value: !Ref PmoId
+        - Key: project-name
+          Value: !Ref ProjectName
+        - Key: repository
+          Value: !Ref Repository
+        - Key: application-cc
+          Value: !Ref ApplicationCC
+        - Key: project-cc
+          Value: !Ref ProjectCC
+        - Key: tec:environment-type
+          Value: !Sub ${Stage}
+        - Key: tec:state
+          Value: !Ref State
+
+  LambdasFunctions:
+    DependsOn: IamRoleLambda
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${BucketNameInfra}.s3.amazonaws.com/${FolderName}/lambdas-functions.yaml
+      Parameters:
+        StackName: !Ref StackName
+        AccountNumber: !Ref AccountNumber
+        AwsRegion: !Ref AwsRegion
+        BucketNameScripts: !Ref BucketNameScripts
+        FolderName: !Ref FolderName
+        PrivateSubnetId: !Ref PrivateSubnetId
+        LambdaName1: !Ref LambdaName1
+        LambdaName2: !Ref LambdaName2
+        LambdaName3: !Ref LambdaName3
+        LambdaRoleARN: !GetAtt IamRoleLambda.Outputs.LambdaRoleOutputARN
+      Tags:
+        - Key: Name
+          Value: !Sub Lambda-Secret-${AreaPath}-${Stage}
+        - Key: application-code
+          Value: !Ref ApplicationCode
+        - Key: billing-mode
+          Value: !Ref BillingMode
+        - Key: pmo-id
+          Value: !Ref PmoId
+        - Key: project-name
+          Value: !Ref ProjectName
+        - Key: repository
+          Value: !Ref Repository
+        - Key: application-cc
+          Value: !Ref ApplicationCC
+        - Key: project-cc
+          Value: !Ref ProjectCC
+        - Key: tec:environment-type
+          Value: !Sub ${Stage}
+        - Key: tec:state
+          Value: !Ref State
+
+  ApiGateway:
+    DependsOn: LambdasFunctions
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${BucketNameInfra}.s3.amazonaws.com/${FolderName}/api-gateway.yaml
+      Parameters:
+        Stage: !Ref Stage
+        AccountNumber: !Ref AccountNumber
+        AwsRegion: !Ref AwsRegion
+        ApiName: !Ref ApiName
+        LambdaFunctionOutputARN1: !GetAtt LambdasFunctions.Outputs.LambdaRoleOutputARN1
+        LambdaFunctionOutputARN2: !GetAtt LambdasFunctions.Outputs.LambdaRoleOutputARN2
+        LambdaFunctionOutputARN3: !GetAtt LambdasFunctions.Outputs.LambdaRoleOutputARN3
+      Tags:
+        - Key: Name
+          Value: !Sub Lambda-Secret-${AreaPath}-${Stage}
+        - Key: application-code
+          Value: !Ref ApplicationCode
+        - Key: billing-mode
+          Value: !Ref BillingMode
+        - Key: pmo-id
+          Value: !Ref PmoId
+        - Key: project-name
+          Value: !Ref ProjectName
+        - Key: repository
+          Value: !Ref Repository
+        - Key: application-cc
+          Value: !Ref ApplicationCC
+        - Key: project-cc
+          Value: !Ref ProjectCC
+        - Key: tec:environment-type
+          Value: !Sub ${Stage}
+        - Key: tec:state
+          Value: !Ref State          

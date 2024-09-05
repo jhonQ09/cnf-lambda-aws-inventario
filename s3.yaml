@@ -1,0 +1,147 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Creacion de Buckets para la herramienta de conciliacion
+Parameters:
+  #Parametros para creacion de Bucket Simple.
+  Stage:
+    Description: Stage codigo de letras definidos para los nombres de los ambientes
+    Type: String
+
+  BucketNameScripts:
+    Description: Nombre del Bucket que contendra las carpetas el source code y librerias de cada microservicio
+    Type: String
+
+  BucketNameInfra:
+    Description: Nombre del bucket encargado de alojar la infraestructura principal
+    Type: String
+
+  BucketNameReports:
+    Description: Nombre del bucket donde se alojara la data de salida
+    Type: String
+
+  FolderNameOrigen:
+    Description: Nombre  de la carpeta en el bucket para los insumos de origen
+    Type: String
+
+  FolderNameReportes:
+    Description: Nombre  de la carpeta en el bucket para los insumos de  los
+      reportes
+    Type: String
+
+Resources:
+  S3BucketReports:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketNameReports
+      LoggingConfiguration:
+        DestinationBucketName: !Ref BucketNameReports
+        LogFilePrefix: !Sub ${BucketNameReports}/logs/
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: IntelligentTiering
+            Prefix: IntelligentTiering
+            Status: Enabled
+            ExpirationInDays: 30
+            Transitions:
+              - TransitionInDays: 1
+                StorageClass: INTELLIGENT_TIERING
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+  
+  S3BucketInfraPrincipal:
+    DependsOn: S3BucketReports
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketNameInfra
+      LoggingConfiguration:
+        DestinationBucketName: !Ref BucketNameReports
+        LogFilePrefix: !Sub ${BucketNameInfra}/logs/
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: IntelligentTiering
+            Prefix: IntelligentTiering
+            Status: Enabled
+            ExpirationInDays: 30
+            Transitions:
+              - TransitionInDays: 1
+                StorageClass: INTELLIGENT_TIERING
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+
+  S3BucketScripts:
+    DependsOn: S3BucketReports
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketNameScripts
+      LoggingConfiguration:
+        DestinationBucketName: !Ref BucketNameReports
+        LogFilePrefix: !Sub ${BucketNameScripts}/logs/
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: IntelligentTiering
+            Prefix: IntelligentTiering
+            Status: Enabled
+            ExpirationInDays: 30
+            Transitions:
+              - TransitionInDays: 1
+                StorageClass: INTELLIGENT_TIERING
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+Outputs:
+  BucketNameScriptsArn:
+    Description: Arn del Bucket de Logs
+    Value: !GetAtt S3BucketScripts.Arn
+  BucketNameInfraArn:
+    Description: Arn del Bucket de Logs
+    Value: !GetAtt S3BucketInfraPrincipal.Arn
+  BucketNameReportsArn:
+    Description: Arn del Bucket de data de salida
+    Value: !GetAtt S3BucketReports.Arn
