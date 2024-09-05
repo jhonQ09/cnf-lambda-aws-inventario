@@ -76,8 +76,20 @@
     "ParameterValue": "$(BucketNameInfra)"
   },
   {
-    "ParameterKey": "BucketNameLambda",
-    "ParameterValue": "$(BucketNameLambda)"
+    "ParameterKey": "BucketNameScripts",
+    "ParameterValue": "$(BucketNameScripts)"
+  },
+  {
+    "ParameterKey": "BucketNameReports",
+    "ParameterValue": "$(BucketNameReports)"
+  },
+  {
+    "ParameterKey": "FolderNameOrigen",
+    "ParameterValue": "$(FolderNameOrigen)"
+  },
+  {
+    "ParameterKey": "FolderNameReportes",
+    "ParameterValue": "$(FolderNameReportes)"
   },
   {
     "ParameterKey": "FolderName",

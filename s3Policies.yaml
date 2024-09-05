@@ -1,0 +1,126 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Creacion de Buckets para la herramienta de conciliacion
+
+Parameters:
+
+  Stage:
+    Description: Stage codigo de letras definidos para los nombres de los ambientes
+    Type: String
+
+  BucketNameScriptsArn:
+    Description: Arn del Bucket de scripts
+    Type: String
+
+  BucketNameInfraArn:
+    Description: Arn del Bucket de la infra principal
+    Type: String
+
+  BucketNameReportsArn:
+    Description: Arn del Bucket de la data de salida
+    Type: String
+
+  BucketNameScripts:
+    Description: Nombre del Bucket de entrada que contendra  las carpetas del proyecto insumos de tierra, las formateadas y los reportes y el origen de los mismo
+    Type: String
+    
+  BucketNameReports:
+    Description: Nombre del bucket donde se alojara la data de salida
+    Type: String 
+
+  BucketNameInfra:
+    Description: Nombre del bucket encargado de alojar todas las infraestructura principal
+    Type: String  
+
+  FolderNameOrigen:
+    Description: Nombre  de la carpeta en el bucket para los insumos de origen
+    Type: String
+
+  FolderNameReportes:
+    Description: Nombre  de la carpeta en el bucket para los insumos de  los reportes
+    Type: String
+
+Resources:            
+  S3BucketPolicyBucketNameScripts:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BucketNameScripts
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "Basic Policy"
+            Effect: "Allow"
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: 
+              - "s3:PutObject"
+            Resource:
+              - !Sub "${BucketNameScriptsArn}"
+              - !Sub "${BucketNameScriptsArn}/*"
+          - Sid: "Set Secure Socket Layer"
+            Effect: "Deny"
+            Principal: "*"
+            Action: s3:*
+            Resource:
+              - !Sub "${BucketNameScriptsArn}"
+              - !Sub "${BucketNameScriptsArn}/*"
+            Condition:
+              Bool:
+                aws:SecureTransport: "false" 
+
+  S3BucketPolicyBucketNameInfra:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BucketNameInfra
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "Basic Policy"
+            Effect: "Allow"
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: 
+              - "s3:PutObject"
+            Resource:
+              - !Sub "${BucketNameInfraArn}"
+              - !Sub "${BucketNameInfraArn}/*"
+          - Sid: "Set Secure Socket Layer"
+            Effect: "Deny"
+            Principal: "*"
+            Action: s3:*
+            Resource:
+              - !Sub "${BucketNameInfraArn}"
+              - !Sub "${BucketNameInfraArn}/*"
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"    
+
+  S3BucketPolicyBucketNameReports:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BucketNameReports
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "Basic Policy"
+            Effect: "Allow"
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: 
+              - "s3:PutObject"
+            Resource:
+              - !Sub "${BucketNameReportsArn}"
+              - !Sub "${BucketNameReportsArn}/*"
+          - Sid: "Set Secure Socket Layer"
+            Effect: "Deny"
+            Principal: "*"
+            Action: s3:*
+            Resource:
+              - !Sub "${BucketNameReportsArn}"
+              - !Sub "${BucketNameReportsArn}/*"
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"  

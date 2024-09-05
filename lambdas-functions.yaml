@@ -12,7 +12,7 @@ Parameters:
   AwsRegion:
     Description: Region AWS
     Type: String
-  BucketNameLambda:
+  BucketNameScripts:
     Description: Nombre del Bucket que contendra el codigo de los repositorios Lambda
     Type: String
   FolderName:
@@ -48,7 +48,7 @@ Resources:
       Handler: index.lambda_function
       Role: !Ref LambdaRoleARN
       Code:
-        S3Bucket: !Ref BucketNameLambda
+        S3Bucket: !Ref BucketNameScripts
         S3Key: !Sub ${FolderName}/src/lambda_function1.zip
       Runtime: nodejs20
       Timeout: 40
@@ -80,7 +80,7 @@ Resources:
       Handler: index.lambda_function
       Role: !Ref LambdaRoleARN
       Code:
-        S3Bucket: !Ref BucketNameLambda
+        S3Bucket: !Ref BucketNameScripts
         S3Key: !Sub ${FolderName}/src/lambda_function2.zip
       Runtime: nodejs20
       Timeout: 40
@@ -112,7 +112,7 @@ Resources:
       Handler: index.lambda_function
       Role: !Ref LambdaRoleARN
       Code:
-        S3Bucket: !Ref BucketNameLambda
+        S3Bucket: !Ref BucketNameScripts
         S3Key: !Sub ${FolderName}/src/lambda_function3.zip
       Runtime: nodejs20
       Timeout: 40

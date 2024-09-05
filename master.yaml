@@ -55,11 +55,21 @@ Parameters:
   PrivateSubnetId:
     Description: Subnet de la lambda
     Type: String
-  BucketNameInfra:
-    Description: Nombre del bucket de infraestructura donde se carga el código de la solución
+  BucketNameScripts:
+    Description: Nombre del Bucket que contendra las carpetas el source code y librerias de cada microservicio
     Type: String
-  BucketNameLambda:
-    Description: Nombre del Bucket que contendra el codigo de los repositorios Lambda
+  BucketNameInfra:
+    Description: Nombre del bucket encargado de alojar la infraestructura principal
+    Type: String
+  BucketNameReports:
+    Description: Nombre del bucket donde se alojara la data de salida
+    Type: String
+  FolderNameOrigen:
+    Description: Nombre  de la carpeta en el bucket para los insumos de origen
+    Type: String
+  FolderNameReportes:
+    Description: Nombre  de la carpeta en el bucket para los insumos de  los
+      reportes
     Type: String
   FolderName:
     Description: Nombre del folder donde se alojara  los archivos yaml de la  infraestructura  de la aplicacion
@@ -85,7 +95,78 @@ Parameters:
   LogGroupName:
     Description: Log group name
     Type: String
+
 Resources:
+  s3Buckets:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Sub "https://${BucketNameInfra}.s3.amazonaws.com/${FolderName}/s3.yaml"
+      Parameters:
+        Stage: !Ref Stage
+        BucketNameScripts: !Ref BucketNameScripts
+        BucketNameInfra: !Ref BucketNameInfra
+        BucketNameReports: !Ref BucketNameReports
+        FolderNameOrigen: !Ref FolderNameOrigen
+        FolderNameReportes: !Ref FolderNameReportes
+      Tags:
+        - Key: Name
+          Value: !Sub s3-${AreaPath}-${Stage}
+        - Key: application-code
+          Value: !Ref ApplicationCode
+        - Key: billing-mode
+          Value: !Ref BillingMode
+        - Key: pmo-id
+          Value: !Ref PmoId
+        - Key: project-name
+          Value: !Ref ProjectName
+        - Key: repository
+          Value: !Ref Repository
+        - Key: application-cc
+          Value: !Ref ApplicationCC
+        - Key: project-cc
+          Value: !Ref ProjectCC
+        - Key: "tec:environment-type"
+          Value: !Sub "${Stage}"
+        - Key: "tec:state"
+          Value: !Ref State 
+  
+  s3BucketsPolicies:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: s3Buckets
+    Properties:
+      TemplateURL: !Sub "https://${BucketNameInfra}.s3.amazonaws.com/${FolderName}/s3Policies.yaml"
+      Parameters:
+        Stage: !Ref Stage
+        BucketNameScriptsArn: !GetAtt s3Buckets.Outputs.BucketNameScriptsArn
+        BucketNameInfraArn: !GetAtt s3Buckets.Outputs.BucketNameInfraArn
+        BucketNameReportsArn: !GetAtt s3Buckets.Outputs.BucketNameReportsArn
+        BucketNameScripts: !Ref BucketNameScripts
+        BucketNameInfra: !Ref BucketNameInfra
+        BucketNameReports: !Ref BucketNameReports
+        FolderNameOrigen: !Ref FolderNameOrigen
+        FolderNameReportes: !Ref FolderNameReportes
+      Tags:
+        - Key: Name
+          Value: !Sub s3-${AreaPath}-${Stage}
+        - Key: application-code
+          Value: !Ref ApplicationCode
+        - Key: billing-mode
+          Value: !Ref BillingMode
+        - Key: pmo-id
+          Value: !Ref PmoId
+        - Key: project-name
+          Value: !Ref ProjectName
+        - Key: repository
+          Value: !Ref Repository
+        - Key: application-cc
+          Value: !Ref ApplicationCC
+        - Key: project-cc
+          Value: !Ref ProjectCC
+        - Key: "tec:environment-type"
+          Value: !Sub "${Stage}"
+        - Key: "tec:state"
+          Value: !Ref State
+
   IamRoleLambda:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -125,7 +206,7 @@ Resources:
         StackName: !Ref StackName
         AccountNumber: !Ref AccountNumber
         AwsRegion: !Ref AwsRegion
-        BucketNameLambda: !Ref BucketNameLambda
+        BucketNameScripts: !Ref BucketNameScripts
         FolderName: !Ref FolderName
         PrivateSubnetId: !Ref PrivateSubnetId
         LambdaName1: !Ref LambdaName1
